@@ -10,7 +10,11 @@ public class AdjPairs {
 		this.adjCount = 0;
 	}
 	
-	public void countAdjPairs(ConversationEntity conversation){
+	public AdjPairs(ConversationEntity conversation){
+		this.countAdjPairs(conversation);
+	}
+	
+	public int countAdjPairs(ConversationEntity conversation){
 		System.out.println("ConversationID: " + conversation.getConversationID());
 		List<UtteranceEntity> utterances = conversation.getUtterances();
 		this.lineCount = utterances.size();
@@ -19,16 +23,28 @@ public class AdjPairs {
 				this.adjCount++;
 			}
 		}
-		System.out.println("Line Count: " + lineCount);
-		System.out.println("Adjacency Pairs: " + adjCount);
+		return adjCount;
 	}
+	
+	public int getLineCount() {
+		return lineCount;
+	}
+	
+	public int getAdjCount() {
+		return adjCount;
+	}
+
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ConversationList conversationList = new ConversationList();
 		conversationList.createConversationList();
 		
 		AdjPairs adjPairs = new AdjPairs();
-		adjPairs.countAdjPairs(conversationList.getConversationList().get(7));
+		int numberOfAdjPairs = adjPairs.countAdjPairs(conversationList.getConversationList().get(0));
+		System.out.println("Line Count: " + adjPairs.getLineCount());
+		System.out.println("Adjacency Pairs: " + numberOfAdjPairs);
+		
 		
 		/*
 		for(ConversationEntity convo:conversationList.getConversationList()){
