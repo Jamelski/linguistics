@@ -15,7 +15,8 @@ public class AdjPairs {
 	}
 	
 	public int countAdjPairs(ConversationEntity conversation){
-		System.out.println("ConversationID: " + conversation.getConversationID());
+		//Used for testing
+		//System.out.println("ConversationID: " + conversation.getConversationID());
 		List<UtteranceEntity> utterances = conversation.getUtterances();
 		this.lineCount = utterances.size();
 		for(int i=0; i < this.lineCount-1; i++){
@@ -38,7 +39,7 @@ public class AdjPairs {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ConversationList conversationList = new ConversationList();
-		conversationList.createConversationList();
+		conversationList.createConversationList("/Users/jlawson/Desktop/Chat_Data.csv");
 		
 		AdjPairs adjPairs = new AdjPairs();
 		int numberOfAdjPairs = adjPairs.countAdjPairs(conversationList.getConversationList().get(0));

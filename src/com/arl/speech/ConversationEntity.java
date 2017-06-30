@@ -7,11 +7,16 @@ public class ConversationEntity {
 	//instance variables
 	private List<UtteranceEntity> utterances;
 	private String conversationID;
-	
+
 	//no-args constructor
 	ConversationEntity(){
 		conversationID = new String();
 		utterances = new ArrayList<UtteranceEntity>();
+	}
+	
+	ConversationEntity(ConversationEntity conversation){
+		this.utterances = conversation.getUtterances();
+		this.conversationID = conversation.getConversationID();
 	}
 	
 	//add an utterance to list of utterances

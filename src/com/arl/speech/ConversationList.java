@@ -3,8 +3,10 @@ package com.arl.speech;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConversationList {
@@ -17,8 +19,12 @@ public class ConversationList {
 	public List<ConversationEntity> getConversationList(){
 		return this.conversations;
 	}
-	public void createConversationList(){
-		String csvFile = "/Users/jlawson/Desktop/Chat_Data.csv";
+	
+	public void addConversation(ConversationEntity conversation){
+		conversations.add(conversation);
+	}
+	
+	public void createConversationList(String csvFile){
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
@@ -84,21 +90,98 @@ public class ConversationList {
         }
 	}
 	
+	public ConversationList removeNonAdjPairConvos(){
+		ConversationList cleanConversationList = new ConversationList();
+		for(int i=0; i<this.conversations.size(); i++){
+			AdjPairs adjPairs = new AdjPairs();
+			ConversationEntity checkConversation = new ConversationEntity(this.getConversationList().get(i));
+			int numberOfAdjPairs = adjPairs.countAdjPairs(checkConversation);
+			if(numberOfAdjPairs > 0){
+				cleanConversationList.addConversation(checkConversation);
+			}
+		}
+		return cleanConversationList;
+	}
+	
+	public void exportConversationListToExcel(String fileName){
+		String csvFile = fileName;
+		FileWriter writer;
+		try {
+			writer = new FileWriter(csvFile);
+			CSVUtils.writeLine(writer, Arrays.asList("GameNum", "Participant", "Message", /*"AdjGameNum",*/ "AdjacencyPairs", "LineCount"));
+			for(ConversationEntity conversation:this.conversations){
+
+				AdjPairs adjPairAndLineCount = new AdjPairs(conversation);
+				
+				String tempConversationID = conversation.getConversationID();
+				int adjPairCount = adjPairAndLineCount.getAdjCount();
+				int lineCount = adjPairAndLineCount.getLineCount();
+			
+				
+				for(UtteranceEntity ue:conversation.getUtterances()){
+					CSVUtils.writeLine(writer, Arrays.asList(tempConversationID,
+																ue.getParticipantID(),
+																ue.getPhrase(),
+																/*tempConversationID,*/
+																String.valueOf(adjPairCount),
+																String.valueOf(lineCount)));
+				}			
+				
+			}
+			writer.flush();
+			writer.close();
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void exportAdjacencyPairsToExcel(String fileName){
+		List<ConversationCountsRow> conversationCountsTable 
+		= new ArrayList<ConversationCountsRow>();
+
+
+		for(ConversationEntity conversation:this.conversations){
+		ConversationCountsRow tempRow;
+		AdjPairs adjPairAndLineCount = new AdjPairs(conversation);
+		
+		tempRow = new ConversationCountsRow();
+		tempRow.setConversationID(conversation.getConversationID());
+		tempRow.setAdjacancyPairCount(adjPairAndLineCount.getAdjCount());
+		tempRow.setLineCount(adjPairAndLineCount.getLineCount());
+		
+		conversationCountsTable.add(tempRow);
+		System.out.println(tempRow);
+		}
+		
+		String csvFile = fileName;
+		FileWriter writer;
+		try {
+			writer = new FileWriter(csvFile);
+			CSVUtils.writeLine(writer, Arrays.asList("GameNum", "AdjacencyPairs", "LineCount"));
+			for(ConversationCountsRow ccr:conversationCountsTable){
+				CSVUtils.writeLine(writer, Arrays.asList(ccr.getConversationID()
+															,String.valueOf(ccr.getAdjacancyPairCount())
+															,String.valueOf(ccr.getLineCount())));
+			}
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ConversationList conversationList = new ConversationList();
-		conversationList.createConversationList();
+		conversationList.createConversationList("/Users/jlawson/Desktop/Chat_Data.csv");
 		
-		System.out.println(conversationList);
-		System.out.println(conversationList.conversations.get(0));
-		for(ConversationEntity conversation:conversationList.conversations){
-			List<UtteranceEntity> tempConvo = conversation.getUtterances();
-			for(UtteranceEntity showUtterance:tempConvo){
-				System.out.println(showUtterance);
-			}
-			
-			System.out.println();
-		}
+		conversationList = conversationList.removeNonAdjPairConvos();
+		
+		conversationList.exportConversationListToExcel("/Users/jlawson/Desktop/Adjacency_Conversations.csv");
+		
+		conversationList.exportAdjacencyPairsToExcel("/Users/jlawson/Desktop/Adjacency_ByGame_Conversations.csv");
 	
 	}
 
